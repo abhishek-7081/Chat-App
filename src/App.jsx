@@ -104,23 +104,35 @@ export default function ChatApp() {
   const joinRoom = () => {
     if (!roomId || !username) return;
 
+    console.log('🔄 Attempting to connect to:', WS_URL);
+    console.log('📝 Username:', username, 'Room:', roomId);
+
     try {
       const websocket = new WebSocket(WS_URL);
       
       websocket.onopen = () => {
-        websocket.send(JSON.stringify({
+        console.log('✅ WebSocket connected!');
+        const joinMessage = {
           type: 'join',
           roomId,
           username
-        }));
+        };
+        console.log('📤 Sending join message:', joinMessage);
+        websocket.send(JSON.stringify(joinMessage));
         setWs(websocket);
         setScreen('chat');
       };
 
-      websocket.onerror = () => {
+      websocket.onerror = (error) => {
+        console.error('❌ WebSocket error:', error);
         alert('Could not connect to server. Make sure the server is running on port 3001.');
       };
+
+      websocket.onclose = () => {
+        console.log('🔌 WebSocket closed');
+      };
     } catch (err) {
+      console.error('❌ Connection error:', err);
       alert('Connection failed. Please ensure the server is running.');
     }
   };
