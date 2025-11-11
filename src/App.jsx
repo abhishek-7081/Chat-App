@@ -1,30 +1,30 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Send, Copy, Users, LogOut, Check } from 'lucide-react';
+import React, { useState, useEffect, useRef } from "react";
+import { Send, Copy, Users, LogOut, Check } from "lucide-react";
 
 export default function ChatApp() {
-  const [screen, setScreen] = useState('home');
-  const [roomId, setRoomId] = useState('');
-  const [username, setUsername] = useState('');
+  const [screen, setScreen] = useState("home");
+  const [roomId, setRoomId] = useState("");
+  const [username, setUsername] = useState("");
   const [messages, setMessages] = useState([]);
   const [users, setUsers] = useState([]);
-  const [inputMessage, setInputMessage] = useState('');
+  const [inputMessage, setInputMessage] = useState("");
   const [ws, setWs] = useState(null);
   const [typingUsers, setTypingUsers] = useState(new Set());
   const [copied, setCopied] = useState(false);
   const messagesEndRef = useRef(null);
   const typingTimeoutRef = useRef(null);
-  const WS_URL = 'ws://localhost:3001';
+  const WS_URL = "ws://localhost:3001";
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const room = params.get('room');
+    const room = params.get("room");
     if (room) {
       setRoomId(room);
     }
   }, []);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   useEffect(() => {
@@ -34,25 +34,25 @@ export default function ChatApp() {
       const data = JSON.parse(event.data);
 
       switch (data.type) {
-        case 'history':
+        case "history":
           setMessages(data.messages);
           setUsers(data.users);
           break;
 
-        case 'message':
-          setMessages(prev => [...prev, data.message]);
+        case "message":
+          setMessages((prev) => [...prev, data.message]);
           break;
 
-        case 'user_joined':
+        case "user_joined":
           setUsers(data.users);
           break;
 
-        case 'user_left':
+        case "user_left":
           setUsers(data.users);
           break;
 
-        case 'typing':
-          setTypingUsers(prev => {
+        case "typing":
+          setTypingUsers((prev) => {
             const newSet = new Set(prev);
             if (data.isTyping) {
               newSet.add(data.username);
@@ -62,7 +62,7 @@ export default function ChatApp() {
             return newSet;
           });
           setTimeout(() => {
-            setTypingUsers(prev => {
+            setTypingUsers((prev) => {
               const newSet = new Set(prev);
               newSet.delete(data.username);
               return newSet;
@@ -70,7 +70,7 @@ export default function ChatApp() {
           }, 3000);
           break;
 
-        case 'error':
+        case "error":
           alert(data.message);
           leaveRoom();
           break;
@@ -78,12 +78,12 @@ export default function ChatApp() {
     };
 
     ws.onerror = () => {
-      alert('Connection error. Please try again.');
+      alert("Connection error. Please try again.");
     };
 
     ws.onclose = () => {
-      if (screen === 'chat') {
-        alert('Disconnected from server');
+      if (screen === "chat") {
+        alert("Disconnected from server");
         leaveRoom();
       }
     };
@@ -104,77 +104,87 @@ export default function ChatApp() {
   const joinRoom = () => {
     if (!roomId || !username) return;
 
-    console.log('🔄 Attempting to connect to:', WS_URL);
-    console.log('📝 Username:', username, 'Room:', roomId);
+    console.log("🔄 Attempting to connect to:", WS_URL);
+    console.log("📝 Username:", username, "Room:", roomId);
 
     try {
       const websocket = new WebSocket(WS_URL);
-      
+
       websocket.onopen = () => {
-        console.log('✅ WebSocket connected!');
+        console.log("✅ WebSocket connected!");
         const joinMessage = {
-          type: 'join',
+          type: "join",
           roomId,
-          username
+          username,
         };
-        console.log('📤 Sending join message:', joinMessage);
+        console.log("📤 Sending join message:", joinMessage);
         websocket.send(JSON.stringify(joinMessage));
         setWs(websocket);
-        setScreen('chat');
+        setScreen("chat");
       };
 
       websocket.onerror = (error) => {
-        console.error('❌ WebSocket error:', error);
-        alert('Could not connect to server. Make sure the server is running on port 3001.');
+        console.error("❌ WebSocket error:", error);
+        alert(
+          "Could not connect to server. Make sure the server is running on port 3001."
+        );
       };
 
       websocket.onclose = () => {
-        console.log('🔌 WebSocket closed');
+        console.log("🔌 WebSocket closed");
       };
     } catch (err) {
-      console.error('❌ Connection error:', err);
-      alert('Connection failed. Please ensure the server is running.');
+      console.error("❌ Connection error:", err);
+      alert("Connection failed. Please ensure the server is running.");
     }
   };
 
   const sendMessage = () => {
     if (!inputMessage.trim() || !ws) return;
 
-    ws.send(JSON.stringify({
-      type: 'message',
-      text: inputMessage
-    }));
+    ws.send(
+      JSON.stringify({
+        type: "message",
+        text: inputMessage,
+      })
+    );
 
-    setInputMessage('');
-    
+    setInputMessage("");
+
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current);
     }
 
-    ws.send(JSON.stringify({
-      type: 'typing',
-      isTyping: false
-    }));
+    ws.send(
+      JSON.stringify({
+        type: "typing",
+        isTyping: false,
+      })
+    );
   };
 
   const handleTyping = (e) => {
     setInputMessage(e.target.value);
-    
+
     if (ws && e.target.value) {
-      ws.send(JSON.stringify({
-        type: 'typing',
-        isTyping: true
-      }));
-      
+      ws.send(
+        JSON.stringify({
+          type: "typing",
+          isTyping: true,
+        })
+      );
+
       if (typingTimeoutRef.current) {
         clearTimeout(typingTimeoutRef.current);
       }
-      
+
       typingTimeoutRef.current = setTimeout(() => {
-        ws.send(JSON.stringify({
-          type: 'typing',
-          isTyping: false
-        }));
+        ws.send(
+          JSON.stringify({
+            type: "typing",
+            isTyping: false,
+          })
+        );
       }, 1000);
     }
   };
@@ -186,17 +196,19 @@ export default function ChatApp() {
     setWs(null);
     setMessages([]);
     setUsers([]);
-    setScreen('home');
-    setRoomId('');
-    setUsername('');
+    setScreen("home");
+    setRoomId("");
+    setUsername("");
   };
 
-  if (screen === 'home') {
+  if (screen === "home") {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
           <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-indigo-600 mb-2">QuickChat</h1>
+            <h1 className="text-4xl font-bold text-indigo-600 mb-2">
+              QuickChat
+            </h1>
             <p className="text-gray-600">Instant, anonymous group chats</p>
           </div>
 
@@ -276,7 +288,9 @@ export default function ChatApp() {
       <div className="bg-white shadow-sm border-b border-gray-200 px-4 py-3 flex items-center justify-between">
         <div>
           <h2 className="text-xl font-bold text-gray-800">Room: {roomId}</h2>
-          <p className="text-sm text-gray-500">{users.length} participant{users.length !== 1 ? 's' : ''}</p>
+          <p className="text-sm text-gray-500">
+            {users.length} participant{users.length !== 1 ? "s" : ""}
+          </p>
         </div>
         <button
           onClick={leaveRoom}
@@ -296,14 +310,34 @@ export default function ChatApp() {
               </div>
             ) : (
               messages.map((msg) => (
-                <div key={msg.id} className={`flex ${msg.username === username ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`max-w-xs lg:max-w-md ${msg.username === username ? 'bg-indigo-600 text-white' : 'bg-white text-gray-800'} rounded-lg px-4 py-2 shadow`}>
+                <div
+                  key={msg.id}
+                  className={`flex ${
+                    msg.username === username ? "justify-end" : "justify-start"
+                  }`}
+                >
+                  <div
+                    className={`max-w-xs lg:max-w-md ${
+                      msg.username === username
+                        ? "bg-indigo-600 text-white"
+                        : "bg-white text-gray-800"
+                    } rounded-lg px-4 py-2 shadow`}
+                  >
                     <p className="text-xs font-semibold mb-1 opacity-75">
                       {msg.username}
                     </p>
                     <p className="break-words">{msg.text}</p>
-                    <p className={`text-xs mt-1 ${msg.username === username ? 'text-indigo-200' : 'text-gray-500'}`}>
-                      {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    <p
+                      className={`text-xs mt-1 ${
+                        msg.username === username
+                          ? "text-indigo-200"
+                          : "text-gray-500"
+                      }`}
+                    >
+                      {new Date(msg.timestamp).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
                     </p>
                   </div>
                 </div>
@@ -314,7 +348,8 @@ export default function ChatApp() {
 
           {typingUsers.size > 0 && (
             <div className="px-4 py-2 text-sm text-gray-500 italic">
-              {Array.from(typingUsers).join(', ')} {typingUsers.size === 1 ? 'is' : 'are'} typing...
+              {Array.from(typingUsers).join(", ")}{" "}
+              {typingUsers.size === 1 ? "is" : "are"} typing...
             </div>
           )}
 
@@ -324,7 +359,7 @@ export default function ChatApp() {
                 type="text"
                 value={inputMessage}
                 onChange={handleTyping}
-                onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+                onKeyPress={(e) => e.key === "Enter" && sendMessage()}
                 placeholder="Type a message..."
                 className="flex-1 px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"
               />
@@ -355,7 +390,7 @@ export default function ChatApp() {
                 </div>
                 <span className="text-sm font-medium text-gray-800">
                   {user.username}
-                  {user.username === username && ' (You)'}
+                  {user.username === username && " (You)"}
                 </span>
               </div>
             ))}

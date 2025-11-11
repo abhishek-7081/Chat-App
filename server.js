@@ -39,7 +39,7 @@ app.get('/api/room/:roomId', (req, res) => {
 // WebSocket connection handling
 wss.on('connection', (ws, req) => {
   console.log('🔌 New WebSocket connection established');
-  
+
   let currentRoom = null;
   let currentUser = null;
 
@@ -51,7 +51,7 @@ wss.on('connection', (ws, req) => {
       switch (message.type) {
         case 'join':
           const { roomId, username } = message;
-          
+
           // Create room if it doesn't exist
           if (!rooms.has(roomId)) {
             rooms.set(roomId, { users: new Map(), messages: [] });
@@ -59,11 +59,11 @@ wss.on('connection', (ws, req) => {
           }
 
           currentRoom = roomId;
-          currentUser = { 
-            id: Date.now().toString() + Math.random(), 
-            username 
+          currentUser = {
+            id: Date.now().toString() + Math.random(),
+            username
           };
-          
+
           const room = rooms.get(roomId);
           room.users.set(currentUser.id, { username, ws });
 
@@ -126,27 +126,27 @@ wss.on('connection', (ws, req) => {
 
         case 'typing':
           if (!currentRoom || !currentUser) return;
-          
+
           broadcastToRoom(currentRoom, {
             type: 'typing',
             username: currentUser.username,
             isTyping: message.isTyping
           }, ws);
-          
+
           break;
       }
     } catch (err) {
       console.error('❌ Error processing message:', err);
-      ws.send(JSON.stringify({ 
-        type: 'error', 
-        message: 'Server error processing message' 
+      ws.send(JSON.stringify({
+        type: 'error',
+        message: 'Server error processing message'
       }));
     }
   });
 
   ws.on('close', () => {
     console.log('🔌 WebSocket connection closed');
-    
+
     if (currentRoom && currentUser) {
       const room = rooms.get(currentRoom);
       if (room) {
@@ -187,7 +187,7 @@ function broadcastToRoom(roomId, message, excludeWs = null) {
 
   const messageStr = JSON.stringify(message);
   let sentCount = 0;
-  
+
   room.users.forEach((user) => {
     if (user.ws !== excludeWs && user.ws.readyState === 1) {
       user.ws.send(messageStr);
