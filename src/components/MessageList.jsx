@@ -5,16 +5,14 @@ export default function MessageList({ messages, username, messagesEndRef }) {
       {messages.map((msg) => (
         <div
           key={msg.id}
-          className={`flex ${
-            msg.username === username ? "justify-end" : "justify-start"
-          }`}
+          className={`flex ${msg.username === username ? "justify-end" : "justify-start"
+            }`}
         >
           <div
-            className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg shadow ${
-              msg.username === username
-                ? "bg-indigo-600 text-white"
-                : "bg-white text-gray-800"
-            }`}
+            className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg shadow ${msg.username === username
+              ? "bg-indigo-600 text-white"
+              : "bg-white text-gray-800"
+              }`}
           >
             <p className="text-xs font-semibold opacity-75">{msg.username}</p>
             <p>{msg.text}</p>

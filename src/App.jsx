@@ -4,7 +4,7 @@ import ChatApp from '../ChatApp'
 const App = () => {
   return (
     <>
-    <ChatApp/>
+      <ChatApp />
     </>
   )
 }
