@@ -1,7 +1,7 @@
 // ChatApp.jsx
 import HomeScreen from "./components/Homescreen.jsx";
 import ChatScreen from "./components/Chatscreen.jsx";
-import { useChat } from "./hooks/useChat.js";
+import { useChat } from "./hooks/usChat.js";
 
 export default function ChatApp() {
   const WS_URL = "ws://localhost:3001";
