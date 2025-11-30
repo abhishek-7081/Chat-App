@@ -11,7 +11,7 @@ export default function ParticipantsList({ users, username }) {
 
       {users.map((u) => (
         <div key={u.id} className="flex items-center gap-3 px-3 py-2 bg-gray-50 rounded-lg">
-          <div className="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center">
+          <div className="w-8 h-8 rounded-full bg-indigo-600 text-black flex items-center justify-center">
             {u.username[0].toUpperCase()}
           </div>
           <span>{u.username}{u.username === username && " (You)"}</span>
