@@ -14,6 +14,7 @@ const wss = new WebSocketServer({ server });
 const rooms = new Map(); // roomId -> { users: Map, messages: [] }
 
 console.log('🚀 Server initializing...');
+console.log('🚀 Server initializing...');
 
 // Generate random room code
 function generateRoomCode() {
@@ -99,6 +100,7 @@ wss.on('connection', (ws, req) => {
         case 'message':
           if (!currentRoom || !currentUser) {
             console.log('❌ Message sent without joining room');
+            console.log('❌ Message sent without joining room');
             return;
           }
 
@@ -120,6 +122,7 @@ wss.on('connection', (ws, req) => {
             message: chatMessage
           });
 
+          console.log(`📤 Message broadcasted to ${roomData.users.size} users`);
           console.log(`📤 Message broadcasted to ${roomData.users.size} users`);
 
           break;
